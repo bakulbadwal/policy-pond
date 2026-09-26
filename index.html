@@ -391,11 +391,11 @@ HONESTY: the learners are real (REINFORCE, a baseline, PPO's clipped update, GAE
       <div class="tag">Guess first!</div>
       <div class="q">Microduck uses γ = 0.99 and λ = 0.95. After how many planks does a later surprise count half as much?</div>
       <div class="opts"><button data-a="0">About 2</button><button data-a="1" data-right>About 11</button><button data-a="2">About 100</button></div>
-      <div class="why">About 11. γλ = 0.9405, and 0.9405¹¹ ≈ 0.5. So each advantage mixes roughly the next 20 steps of real surprises, and every one of those surprises is itself measured against Mama's guess, which at γ = 0.99 stands for about 100 steps of future. Mama still supplies most of the target: why a good critic matters so much.</div>
+      <div class="why">About 11. γλ = 0.9405, and 0.9405¹¹ ≈ 0.5. So each advantage mixes real surprises over an effective horizon of about 17 steps (1 ÷ (1 − γλ)), and every one of those surprises is itself measured against Mama's guess, which at γ = 0.99 stands for about 100 steps of future. Mama still supplies most of the target: why a good critic matters so much.</div>
     </div>
     <div class="say" data-say="s4">
       <div class="tag">Say it out loud</div>
-      <div class="line">GAE adds up Mama's one-step surprises, fading each later one by γλ. λ = 0 trusts only the next step; λ = 1 waits for the real total. Microduck's 0.95 uses about 20 steps of real rewards, then Mama's guess for everything beyond.</div>
+      <div class="line">GAE adds up Mama's one-step surprises, fading each later one by γλ. λ = 0 trusts only the next step; λ = 1 waits for the real total. Microduck's 0.95 uses real rewards over roughly the next 17 steps, then Mama's guess for everything beyond.</div>
     </div>
   </div>
 </section>
