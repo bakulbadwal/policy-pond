@@ -23,7 +23,7 @@ HONESTY: the learners are real (REINFORCE, a baseline, PPO's clipped update, GAE
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><filter id="gouache" x="-2%" y="-2%" width="104%" height="104%"><feTurbulence type="fractalNoise" baseFrequency=".045" numOctaves="2" seed="3" result="w"/><feDisplacementMap in="SourceGraphic" in2="w" scale="1.3" xChannelSelector="R" yChannelSelector="G"/></filter></defs></svg>
 <div class="wrap">
 <header>
-  <div class="mast"><b>Policy Pond</b><span>a hands-on lab</span></div>
+  <div class="mast"><b><span class="mi" aria-hidden="true"></span>Policy Pond</b><span>a hands-on lab</span></div>
   <div><h1>How a robot learns by trial and error</h1>
   <p class="sub">A duckling learns to cross a pond the way a robot learns to walk: try something, get scored, nudge the habit. Run real policy-gradient and PPO updates in your browser, drag PPO's clip, and break a reward function on purpose. From REINFORCE to PPO in about 90 minutes of play.</p></div>
 </header>
@@ -201,6 +201,7 @@ HONESTY: the learners are real (REINFORCE, a baseline, PPO's clipped update, GAE
     <div class="row"><button class="act" id="s2race">Run the race</button><span class="muted" style="font:15px var(--hand)">300 crossings each, with the finishing bonus you set above</span></div>
     <canvas id="s2chart" height="220" style="margin-top:12px" aria-label="Learning curves with and without a baseline"></canvas>
     <div class="chartcap"><span class="sw" style="background:#C8452F"></span>without Mama · <span class="sw" style="background:#3B7422"></span>with Mama (a running average of hauls). Line = the average duckling's expected crumbs (bonus excluded); band = how much ducklings differ.</div>
+    <div class="callout co-i">Set the bonus to 0 and the two flocks run neck and neck. That's real, not a bug: a baseline helps most when every crossing carries a large common reward, which real tasks nearly always do ("alive" bonuses, "upright" bonuses). The larger the shared part, the more the baseline removes.</div>
   </div>
 
   <div class="card">
@@ -296,7 +297,7 @@ HONESTY: the learners are real (REINFORCE, a baseline, PPO's clipped update, GAE
 
   <div class="card">
     <h3>The cliff: 60 ducklings, 15 rounds of PPO</h3>
-    <p class="lede">Now real PPO training: each round, collect 12 crossings with the current habit, then run K epochs on them. Sixty ducklings with ropes, sixty without, same luck. It's <span class="g" data-g="onpolicy">on-policy</span>, so a duckling that stops choosing route B stops seeing B's crumbs, and never learns it was the best route.</p>
+    <p class="lede">Now real PPO training: each round, collect 12 crossings with the current habit, then run K epochs on them. Sixty ducklings with ropes, sixty without, same luck. It's <span class="g" data-g="onpolicy">on-policy</span>, so a duckling that stops choosing route B stops seeing B's crumbs, and rarely learns it was the best route. Watch the rounds play out: the damage is done early.</p>
     <div class="row"><span class="lbl" style="margin:0">Epochs per batch (K)</span><div class="seg" id="s3fk" style="margin:0"></div><button class="act" id="s3fleet">Train both flocks</button></div>
     <div class="grid g2" style="margin-top:12px">
       <div class="panel"><h3>With lane ropes</h3><div class="flock" id="s3fon"></div><div class="flocknote" id="s3fonn"></div></div>
@@ -307,7 +308,7 @@ HONESTY: the learners are real (REINFORCE, a baseline, PPO's clipped update, GAE
       <div class="tag">Guess first!</div>
       <div class="q">Reuse each batch 40 times with no ropes. Compared with the roped flock, what happens?</div>
       <div class="opts"><button data-a="0">Everyone learns faster and better</button><button data-a="1" data-right>More ducklings get stuck on a worse route for good</button><button data-a="2">No difference</button></div>
-      <div class="why">More get stuck. Twelve crossings is a small batch; sometimes B has an unlucky run in it. Squeeze that batch 40 times with no ropes and the habit swings hard away from B, and since it's on-policy, B stops being sampled, so the mistake never gets corrected. That's the course's "falling off the cliff". With the ropes, one misleading batch can move the habit only so far. Pick K = 40 and run it.</div>
+      <div class="why">More get stuck. Twelve crossings is a small batch; sometimes B has an unlucky run in it. Squeeze that batch 40 times with no ropes and the habit swings hard away from B, and since it's on-policy, B is almost never sampled again, so the mistake is rarely corrected. That's the course's "falling off the cliff". With the ropes, one misleading batch can move the habit only so far. Pick K = 40 and run it.</div>
     </div>
     <div class="say" data-say="s3">
       <div class="tag">Say it out loud</div>
@@ -492,7 +493,7 @@ HONESTY: the learners are real (REINFORCE, a baseline, PPO's clipped update, GAE
 <section id="ft" data-title="Field Test" data-n="✓">
   <div class="card">
     <h2>✓ Field test</h2>
-    <p class="lede">Eight questions. Answer each by operating the widget in the step named (or its formula), not from memory. Six or more earns the check.</p>
+    <p class="lede">Eight questions. Answer each by operating the widget in the step named, not from memory. Six or more earns the check.</p>
     <div id="ftqs"></div>
     <div class="btnrow"><button class="act" id="ftgo">Grade me</button><span id="ftscore" style="font:18px var(--hand);align-self:center"></span></div>
   </div>

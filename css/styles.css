@@ -296,3 +296,13 @@ a.ghost:hover{background:#FFF1C6}
 #s6knob p{font-size:15.5px;margin-top:6px}
 .s6grid{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}
 @media(max-width:760px){.s6grid{grid-template-columns:1fr}#s6knob{position:static}}
+.nextrow{display:flex;justify-content:flex-end;margin:-6px 0 28px}
+.mast .mi{display:inline-block;width:38px;height:38px;vertical-align:-7px;margin-right:6px}
+.mast .mi svg{width:100%;height:100%;display:block}
+.rt.hit{animation:hit .6s ease-out}
+@keyframes hit{from{background:#FFF1A8;transform:translateX(4px)}to{background:var(--sheet);transform:none}}
+.tile.won{animation:won .6s cubic-bezier(.16,1,.3,1);background:#FFF1A8}
+.tile.won .cr{font-size:20px;color:var(--grass-d)}
+@keyframes won{0%{transform:scale(1)}40%{transform:scale(1.14)}100%{transform:scale(1)}}
+.strip.over .tile:not(.here){opacity:.55}
+.tile6.now{outline:3px solid var(--yellow);outline-offset:2px;opacity:1}

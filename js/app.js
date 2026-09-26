@@ -172,9 +172,11 @@
   function s0run() {
     clearInterval(s0.timer);
     s0.ep = S.stripEpisode(s0.seed, +$("s0p").value); s0.shown = 0; s0strip(0); s0stats();
+    $("s0strip").classList.remove("over");
     s0.timer = setInterval(function () {
-      s0.shown++; s0strip(s0.ep[s0.shown - 1].s2); s0stats();
-      if (s0.shown >= s0.ep.length) clearInterval(s0.timer);
+      s0.shown++; var step = s0.ep[s0.shown - 1]; s0strip(step.s2); s0stats();
+      if (step.done) $("s0strip").querySelector(".tile.goal").classList.add("won");
+      if (s0.shown >= s0.ep.length) { clearInterval(s0.timer); if (!step.done) $("s0strip").classList.add("over"); }
     }, 320);
     touch("s0");
   }
@@ -229,6 +231,7 @@
     $("s1n").textContent = fmt(s1.hist.length);
     $("s1J").textContent = fmt(S.expectedReward(pi), 2);
     var L = s1.last;
+    if (L) qa(".rt", $("s1routes"))[L.a].classList.add("hit");   // flash the route just taken
     $("s1last").textContent = L ? S.ROUTES[L.a].id + " · " + sgn(L.r, 2) : "–";
     $("s1math").innerHTML = '<div class="eq">θ ← θ + α · R · (onehot(route) − π)</div>' + (L ?
       '<div class="eqn">Last crossing: route <b>' + S.ROUTES[L.a].id + "</b>, R = " + sgn(L.r, 2) + "<br>push = R × (onehot − π) = [" + L.g.map(function (v) { return sgn(v, 2); }).join(", ") + "]<br>" +
@@ -333,7 +336,7 @@
     $("s3case").textContent = "Case " + o.caseNo;
     $("s3math").innerHTML = '<div class="eq">L = min( r·A , clip(r, 1−ε, 1+ε)·A )</div><div class="eqn">= min( ' + fmt(r, 2) + " × " + sgn(s3.A, 0) + " , " + fmt(PP.clip(r, 1 - s3.eps, 1 + s3.eps), 2) + " × " + sgn(s3.A, 0) + " )<br>= min( " + sgn(o.unclipped, 2) + " , " + sgn(o.clipped, 2) + " ) = <b>" + sgn(o.L, 2) + "</b><br><i>" + CASES[o.caseNo][0] + ":</i> " + CASES[o.caseNo][1] + "</div>";
     var key = o.caseNo; if (!store.six[key]) { store.six[key] = true; save(); }
-    drawers.s3chart(); s3six();
+    drawers.s3chart(); s3six(o.caseNo);
   }
   drawers.s3chart = function () {
     var g = ctxFor("s3chart"), x = g.x, pad = { l: 44, r: 14, t: 12, b: 26 }, A = s3.A, e = s3.eps, r = +$("s3r").value;
@@ -354,14 +357,14 @@
     [0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6].forEach(function (t) { x.fillText(fmt(t, 1), sx(t), g.h - 11); });
     x.fillStyle = C.red; x.fillText("1−ε", sx(1 - e), pad.t + 8); x.fillText("1+ε", sx(1 + e), pad.t + 8);
   };
-  function s3six() {
+  function s3six(now) {
     var e = s3.eps, html = "";
     [[1, 1, 1], [2, -1, 1], [3, 1, 1 - e - 0.15], [4, -1, 1 - e - 0.15], [5, 1, 1 + e + 0.15], [6, -1, 1 + e + 0.15]].forEach(function (c) {
       var n = c[0], A = c[1], rr = c[2], o = PP.clipObjective(rr, A, e), W = 160, H = 90;
       var sx = function (v) { return 8 + (v - 0.4) / 1.2 * (W - 16); }, sy = function (v) { return 45 - v * 22; };
       var p = "";
       for (var v = 0.4; v <= 1.6001; v += 0.02) p += (p ? "L" : "M") + sx(v).toFixed(1) + " " + sy(PP.clipObjective(v, A, e).L).toFixed(1);
-      html += '<div class="tile6' + (store.six[n] ? " seen" : "") + '"><svg viewBox="0 0 ' + W + " " + H + '"><rect x="' + sx(1 - e) + '" y="4" width="' + (sx(1 + e) - sx(1 - e)) + '" height="82" fill="#CFE6F3"/><path d="M8 45H152" stroke="#B9A98A" stroke-width="1"/><path d="' + p + '" fill="none" stroke="#246A9C" stroke-width="3"/><circle cx="' + sx(rr) + '" cy="' + sy(o.L) + '" r="6" fill="' + (o.flows ? "#5FA03C" : "#C8452F") + '" stroke="#4A2E1E" stroke-width="1.5"/></svg>' +
+      html += '<div class="tile6' + (store.six[n] ? " seen" : "") + (n === now ? " now" : "") + '"><svg viewBox="0 0 ' + W + " " + H + '"><rect x="' + sx(1 - e) + '" y="4" width="' + (sx(1 + e) - sx(1 - e)) + '" height="82" fill="#CFE6F3"/><path d="M8 45H152" stroke="#B9A98A" stroke-width="1"/><path d="' + p + '" fill="none" stroke="#246A9C" stroke-width="3"/><circle cx="' + sx(rr) + '" cy="' + sy(o.L) + '" r="6" fill="' + (o.flows ? "#5FA03C" : "#C8452F") + '" stroke="#4A2E1E" stroke-width="1.5"/></svg>' +
         '<div class="t6"><b>' + n + (store.six[n] ? " ✓" : "") + "</b> " + CASES[n][0] + '<br><span class="' + (o.flows ? "ok" : "bad") + '">' + (o.flows ? "push" : "no push") + "</span></div></div>";
     });
     $("s3six").innerHTML = html;
@@ -384,18 +387,28 @@
     $("s3J").textContent = fmt(last.J, 2);
   }
   function duckDot(color) { return '<svg viewBox="0 0 20 16" aria-hidden="true"><ellipse cx="9" cy="10" rx="8" ry="5" fill="' + color + '" stroke="#4A2E1E" stroke-width="1.4"/><circle cx="14" cy="5" r="3.6" fill="' + color + '" stroke="#4A2E1E" stroke-width="1.4"/><path d="M17.3 5l2.4 .8-2.4 .8z" fill="#E8923A" stroke="#4A2E1E" stroke-width=".8"/></svg>'; }
-  function s3flock() {
-    if (!s3.fleet) return;
-    ["on", "off"].forEach(function (k) {
-      var fin = s3.fleet[k].map(function (run) { return run[run.length - 1]; });
+  // Draw both flocks as they stood after round k (round 0 = before any training).
+  function s3flockRound(k) {
+    var R = s3.fleet.on[0].length - 1;
+    ["on", "off"].forEach(function (key) {
+      var fin = s3.fleet[key].map(function (run) { return run[Math.min(k, run.length - 1)]; });
       var good = 0, stuck = 0;
-      $("s3f" + k).innerHTML = fin.map(function (f) {
+      $("s3f" + key).innerHTML = fin.map(function (f) {
         var c = f.pi[1] > 0.8 ? (good++, "#F4C430") : f.pi[1] < 0.1 ? (stuck++, "#C8452F") : "#9CCBEA";
         return '<span title="B chance ' + pct(f.pi[1]) + '">' + duckDot(c) + "</span>";
       }).join("");
       var avg = fin.reduce(function (s, f) { return s + f.J; }, 0) / fin.length;
-      $("s3f" + k + "n").innerHTML = "<b class=\"" + (stuck ? "bad" : "ok") + "\">" + stuck + " stuck</b> · " + good + " favour B · average " + fmt(avg, 2) + " crumbs per crossing";
+      $("s3f" + key + "n").innerHTML = '<span class="muted">round ' + k + " of " + R + "</span> · <b class=\"" + (stuck ? "bad" : "ok") + "\">" + stuck + " stuck</b> · " + good + " favour B · average " + fmt(avg, 2) + " crumbs per crossing";
     });
+  }
+  // Play the rounds out one by one, so the cliff is seen happening rather than reported.
+  function s3flock() {
+    if (!s3.fleet) return;
+    clearInterval(s3.anim);
+    var R = s3.fleet.on[0].length - 1, k = 0;
+    if (REDUCED) { s3flockRound(R); return; }
+    s3flockRound(0);
+    s3.anim = setInterval(function () { k++; s3flockRound(k); if (k >= R) clearInterval(s3.anim); }, 280);
   }
   function initS3() {
     range("s3r", function () { s3render(); touch("s3"); });
@@ -490,12 +503,36 @@
   function trainMenu(task, weights) {
     var tot = S.behaviourTotals(task, weights), hist = S.learnMenu(tot, 300, 0.5), pi = hist[hist.length - 1];
     var win = 0; pi.forEach(function (p, i) { if (p > pi[win]) win = i; });
-    return { tot: tot, pi: pi, win: tot[win], audit: S.penaltyAudit(task, weights, tot[win].id) };
+    return { tot: tot, hist: hist, pi: pi, win: tot[win], audit: S.penaltyAudit(task, weights, tot[win].id) };
   }
-  function renderBehave(el, res) {
+  // One frame of the learner: the policy `pi` after `n` updates. `final` marks the settled state.
+  function renderBehave(el, res, pi, n, final) {
     el.innerHTML = res.tot.map(function (b, i) {
-      return '<div class="bh' + (b === res.win ? " win" : "") + '"><span class="bn">' + esc(b.name) + (b.want ? ' <small>(what you wanted)</small>' : "") + '</span><span class="bb"><i style="width:' + (res.pi[i] * 100) + '%"></i></span><span class="bp">' + pct(res.pi[i]) + '</span><span class="bt">' + sgn(b.total, 1) + "</span></div>";
-    }).join("") + '<div class="scax"><span>chance the learner picks it</span><span></span><span>total reward</span></div>';
+      return '<div class="bh' + (final && b === res.win ? " win" : "") + '"><span class="bn">' + esc(b.name) + (b.want ? ' <small>(what you wanted)</small>' : "") + '</span><span class="bb"><i style="width:' + (pi[i] * 100) + '%"></i></span><span class="bp">' + pct(pi[i]) + '</span><span class="bt">' + sgn(b.total, 1) + "</span></div>";
+    }).join("") + '<div class="scax"><span>chance the learner picks it</span><span>' + (final ? "settled after " + res.hist.length + " updates" : "update " + n + " of " + res.hist.length) + '</span><span>total reward</span></div>';
+  }
+  // Play the 300 updates out over about a second, so the learner is seen learning; then call `done`.
+  // Time-based, with a timeout fallback: a hidden tab throttles animation frames, and the log
+  // audit and the review-board grade must never wait on that.
+  function playBehave(el, res, done) {
+    if (el._raf) cancelAnimationFrame(el._raf);
+    if (el._to) clearTimeout(el._to);
+    var H = res.hist, t0 = performance.now(), D = 900, finished = false;
+    function finish() {
+      if (finished) return; finished = true;
+      if (el._raf) cancelAnimationFrame(el._raf); el._raf = null; clearTimeout(el._to);
+      renderBehave(el, res, res.pi, H.length, true); if (done) done();
+    }
+    if (REDUCED) { finish(); return; }
+    function frame() {
+      var f = (performance.now() - t0) / D;
+      if (f >= 1) return finish();
+      var i = Math.floor(f * (H.length - 1));
+      renderBehave(el, res, H[i], i + 1, false);
+      el._raf = requestAnimationFrame(frame);
+    }
+    frame();
+    el._to = setTimeout(finish, D + 250);
   }
   function renderAudit(el, task, weights, res) {
     var parts = res.win.parts;
@@ -506,7 +543,11 @@
   }
   var s5 = { task: "walk", w: { walk: defaults("walk"), getup: defaults("getup") } };
   function s5table() { termTable($("s5terms"), s5.task, s5.w[s5.task], function () { touch("s5"); }); }
-  function s5train() { var r = trainMenu(s5.task, s5.w[s5.task]); renderBehave($("s5behave"), r); renderAudit($("s5audit"), s5.task, s5.w[s5.task], r); }
+  function s5train() {
+    var r = trainMenu(s5.task, s5.w[s5.task]);
+    $("s5audit").innerHTML = "";
+    playBehave($("s5behave"), r, function () { renderAudit($("s5audit"), s5.task, s5.w[s5.task], r); });
+  }
   function initS5() {
     seg($("s5task"), [{ v: "walk", label: "Walk forward" }, { v: "getup", label: "Get up after a fall" }], "walk", function (v) { s5.task = v; s5table(); s5train(); touch("s5"); });
     $("s5train").onclick = function () { s5train(); touch("s5"); };
@@ -629,12 +670,16 @@
     el.innerHTML = "<h3>" + c.title + '</h3><div class="brief">' + c.brief + '</div><div class="terms" id="' + id + 't"></div><div class="btnrow"><button class="act" id="' + id + 'go">Re-train</button><button class="ghost" id="' + id + 'rs">Back to the broken run</button></div><div class="grid g2"><div><div class="lbl">What it learns</div><div class="behave" id="' + id + 'b"></div></div><div><div class="lbl">The logs</div><div class="audit" id="' + id + 'a"></div></div></div>' + reasonHTML(id, c.reason) + '<div class="checks" id="' + id + 'c"></div>';
     function draw() { termTable($(id + "t"), c.task, w, function () {}); }
     function run(grade) {
-      var res = trainMenu(c.task, w); renderBehave($(id + "b"), res); renderAudit($(id + "a"), c.task, w, res);
-      if (!grade) { $(id + "c").innerHTML = ""; return; }
-      var ans = readReason(id); store.capAns[id] = ans;
-      var list = c.checks(w, res), ok = ans === c.right, pass = ok && list.every(function (x) { return x[1]; });
-      $(id + "c").innerHTML = checksHTML(list, ok) + (pass ? '<div class="callout co-g"><b>Case closed.</b></div>' : "");
-      store.cap[id] = pass; save(); capStars();
+      var res = trainMenu(c.task, w);
+      $(id + "a").innerHTML = ""; $(id + "c").innerHTML = "";
+      playBehave($(id + "b"), res, function () {
+        renderAudit($(id + "a"), c.task, w, res);
+        if (!grade) return;
+        var ans = readReason(id); store.capAns[id] = ans;
+        var list = c.checks(w, res), ok = ans === c.right, pass = ok && list.every(function (x) { return x[1]; });
+        $(id + "c").innerHTML = checksHTML(list, ok) + (pass ? '<div class="callout co-g"><b>Case closed.</b></div>' : "");
+        store.cap[id] = pass; save(); capStars();
+      });
     }
     $(id + "go").onclick = function () { run(true); };
     $(id + "rs").onclick = function () { w = c.start(); draw(); run(false); };
@@ -680,7 +725,7 @@
   /* ================= FIELD TEST ================= */
   var FT = [
     { q: "Step 0: which γ gives a horizon of exactly 1 second at 50 steps per second?", type: "num", ans: 0.98, tol: 0.0005, hint: "1 s = 50 steps = 1 ÷ (1 − γ)" },
-    { q: "Step 0 (use the formula; the dial has no stop there): 1 crumb now or 10 crumbs 30 steps later. What's the smallest γ (two decimals) at which the duckling prefers to wait?", type: "num", lo: 0.9262, hi: 0.935, hint: "10 × γ³⁰ > 1" },
+    { q: "Step 3: pick K = 40 and train both flocks. Without the ropes, how many of the 60 ducklings end up stuck?", type: "num", ans: 9, tol: 0.5 },
     { q: "Step 2: with a 10-crumb finishing bonus, does subtracting Mama's guess change the true (average) push?", type: "opt", opts: ["Yes, it gets bigger", "No, only the spread changes", "Yes, it flips sign"], ans: 1 },
     { q: "Step 2: r = 1, V(here) = 4, V(next) = 4, γ = 0.99, not finished. What's δ?", type: "num", ans: 0.96, tol: 0.005 },
     { q: "Step 3: ε = 0.2 and the crossing was worse than expected (A = −1). Below which ratio does the push stop?", type: "num", ans: 0.8, tol: 0.001 },
@@ -714,11 +759,30 @@
     qa(".scene[data-art]").forEach(function (el) { var svg = A[el.dataset.art]; if (svg && !el.firstChild) el.innerHTML = svg; });
   }
 
+  /* ---------------- next-step buttons ---------------- */
+  function buildNext() {
+    sections.forEach(function (s, i) {
+      var n = sections[i + 1]; if (!n) return;
+      var row = document.createElement("div"); row.className = "nextrow";
+      var b = document.createElement("button"); b.type = "button"; b.className = "act";
+      b.textContent = "Next: " + n.dataset.n + " · " + n.dataset.title + " →";
+      b.onclick = function () { show(n.id); };
+      row.appendChild(b); s.appendChild(row);
+    });
+  }
+
   /* ---------------- boot ---------------- */
+  var REDUCED = false; try { REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
   try { if ("scrollRestoration" in history) history.scrollRestoration = "manual"; } catch (e) {}
   renderArt();
   qa(".kmap .k[data-i]").forEach(function (el) { el.innerHTML = IC[el.dataset.i] || ""; });
-  buildNav();
+  qa(".mast .mi").forEach(function (el) { el.innerHTML = IC.duck || ""; });
+  buildNav(); buildNext();
+  // A hash typed or pasted into an open tab should switch the step too (show() uses replaceState, which doesn't fire this).
+  window.addEventListener("hashchange", function () {
+    var id = (location.hash || "").replace("#", "");
+    if ($(id) && $(id).tagName === "SECTION" && !$(id).classList.contains("on")) show(id);
+  });
   initS0(); initS1(); initS2(); initS3(); initS4(); initS5(); initS6(); initCap(); initFT();
   initTips(document);
   initPredicts();

@@ -47,7 +47,9 @@ Numeric checks are asserted against `window.PP` / `window.PPSim` (the pure math 
 - C5 Every step names the course unit it covers, or says plainly that it isn't in the course (GAE, reward design).
 - C6 The honesty note is on the page and in the README.
 - C7 Capstone: three cases, each with checks on the behaviour *and* the fix, plus a named cause. Known-good fixes pass, known-bad fixes fail for the stated reason (B10–B12).
-- C8 Field test: eight questions answered by operating the widgets, graded automatically (8/8 on right answers, 0/8 on wrong ones; question 2 accepts only γ ≥ 0.9262, the true threshold).
+- C8 Field test: eight questions answered by operating the widgets, graded automatically (8/8 on right answers, 0/8 on wrong ones). Every question is answerable from a widget; question 2 asks for the K = 40 flock's stuck count (9, from B6).
+- C9 The flock plays out round by round (round 0 = untrained, 15 = final); the step 5 and review-board learners play their 300 updates before the log audit appears. The learner animation is time-based with a timeout fallback, so the audit and the grade land within ~1.2 s even in a background tab where animation frames are throttled (verified: 1,212 ms with the tab hidden). Both jump straight to the end under `prefers-reduced-motion`.
+- C10 Every step but the last ends with a "Next: …" button.
 
 ## D. It works
 
@@ -57,3 +59,4 @@ Numeric checks are asserted against `window.PP` / `window.PPSim` (the pure math 
 - D4 Progress persists across reloads in localStorage, wrapped so it degrades safely.
 - D5 Loads at the top of the page even with a `#step` link (the browser's fragment jump is undone after load).
 - D6 A fresh-context adversarial review finds no open correctness issue. Run 25 Sep 2026: 1 blocker (the GAE presets used a critic inconsistent with γ), 3 major, 7 minor. All fixed and re-verified.
+- D7 Changing the URL hash on an already-open page (pasting `#s5`, a hash link) switches the step. Found and fixed in the second review pass, 25 Sep 2026.
