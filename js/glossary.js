@@ -31,7 +31,7 @@ window.PP_GLOSSARY = {
   curriculum: ["Curriculum", "Changing the task or reward over training: start easy or untaxed, harden once the skill exists.", "No fines for splashing until the duckling can actually swim."],
   dr: ["Domain randomization", "Training in many slightly different simulated worlds (friction, mass, sensor tilt) so the policy survives the real one, which is never exactly the simulator.", "Practising on slippery rocks and grippy sand, not one perfect lane."],
   envs: ["Parallel environments", "Many copies of the simulation running at once on a GPU, all collecting experience for the same policy. Microduck uses 4,096.", "The whole flock practising at once."],
-  kl: ["KL divergence", "A measure of how different two probability distributions are. rsl_rl uses it to size each update and adjust the learning rate.", "How much the habit changed in one lesson."],
+  kl: ["KL divergence", "A measure of how different two probability distributions are. rsl_rl, Microduck's training library, uses it to size each update and adjust the learning rate.", "How much the habit changed in one lesson."],
   smoke: ["Smoke test", "A tiny run (64 environments, 5 iterations) to catch config mistakes before the expensive run.", "Five quick splashes before booking the whole pond."],
   obsnorm: ["Observation normalization", "Rescaling each sensor reading using running averages so they're on similar scales. The same rescaling must ship with the exported model.", "Translating every sense into the same units."]
 };

@@ -323,6 +323,45 @@
     s2render(); s2td();
   }
 
+  /* ---- Watch Mama learn: TD(0) value learning on the step 0 pond ---- */
+  var s2v = { V: [], seed: 500, n: 0, alpha: 0.1, p: 0.8, lastLoss: null };
+  function s2vReset() { s2v.V = new Array(S.STRIP.n).fill(0); s2v.n = 0; s2v.lastLoss = null; s2vRender(); }
+  function s2vCross(k) {
+    for (var e = 0; e < k; e++) {
+      var ep = S.stripEpisode(s2v.seed++, s2v.p, 200), sq = 0;
+      ep.forEach(function (st) {
+        var d = PP.tdError(st.r, s2v.V[st.s], s2v.V[st.s2], 0.99, st.done);   // her surprise on this paddle
+        s2v.V[st.s] += s2v.alpha * d;                                        // V(here) ← V(here) + α·δ
+        sq += d * d;
+      });
+      s2v.lastLoss = sq / ep.length; s2v.n++;
+    }
+    s2vRender(); touch("s2");
+  }
+  function s2vRender() {
+    var ex = S.stripExactValues(s2v.p, 0.99), all = ex.concat(s2v.V);
+    var lo = Math.min(-5, Math.min.apply(null, all)) * 1.08, hi = Math.max(5, Math.max.apply(null, all)) * 1.08, span = hi - lo, gap = 0;
+    $("s2v").innerHTML = ex.map(function (x, i) {
+      var v = s2v.V[i], goal = i === S.STRIP.goal;
+      if (!goal) gap = Math.max(gap, Math.abs(v - x));
+      var pos = function (y) { return (y - lo) / span * 100; };
+      return '<div class="vt' + (goal ? " goal" : "") + '"><div class="vb"><s class="zero" style="bottom:' + pos(0) + '%"></s><i class="est" style="bottom:' + pos(Math.min(v, 0)) + "%;height:" + (pos(Math.max(v, 0)) - pos(Math.min(v, 0))) + '%"></i><b class="ex" style="bottom:' + pos(x) + '%"></b></div><div class="vl">' + i + (goal ? " 🏁" : "") + '</div><div class="vv">' + (goal ? "0" : sgn(v, 1)) + "</div></div>";
+    }).join("");
+    $("s2vn").textContent = fmt(s2v.n); $("s2vgap").textContent = fmt(gap, 2); $("s2vgap").className = "v " + (gap < 1 ? "good" : gap < 5 ? "warn" : "bad");
+    $("s2vloss").textContent = s2v.lastLoss == null ? "–" : fmt(s2v.lastLoss, 2);
+    $("s2vex0").textContent = sgn(ex[0], 1);
+  }
+  function initS2v() {
+    range("s2vp", function () { s2v.p = +$("s2vp").value; $("s2vpv").textContent = pct(s2v.p); s2vReset(); touch("s2"); });
+    $("s2vpv").textContent = pct(s2v.p);
+    seg($("s2valpha"), [0.02, 0.05, 0.1, 0.3].map(function (v) { return { v: v, label: String(v) }; }), s2v.alpha, function (v) { s2v.alpha = +v; touch("s2"); });
+    $("s2vone").onclick = function () { s2vCross(1); };
+    $("s2vtwenty").onclick = function () { s2vCross(20); };
+    $("s2vtwo").onclick = function () { s2vCross(200); };
+    $("s2vreset").onclick = function () { s2vReset(); touch("s2"); };
+    s2vReset();
+  }
+
   /* ================= STEP 3 · the lane ropes ================= */
   var s3 = { A: 1, eps: 0.2, batchSeed: 42, K: 20, fleet: null };
   var CASES = {
@@ -788,7 +827,7 @@
     var id = (location.hash || "").replace("#", "");
     if ($(id) && $(id).tagName === "SECTION" && !$(id).classList.contains("on")) show(id);
   });
-  initS0(); initS1(); initS2(); initS3(); initS4(); initS5(); initS6(); initCap(); initFT();
+  initS0(); initS1(); initS2(); initS2v(); initS3(); initS4(); initS5(); initS6(); initCap(); initFT();
   initTips(document);
   initPredicts();
   sections.forEach(function (s) { checkSay(s.id); });

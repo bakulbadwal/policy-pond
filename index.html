@@ -7,7 +7,10 @@
 <meta name="description" content="A hands-on lab for how robots learn by trial and error: policy gradients, the critic, PPO's clip, GAE and reward hacking, with real algorithms running in your browser.">
 <meta property="og:title" content="Policy Pond: how robots learn by trial and error">
 <meta property="og:description" content="Run real REINFORCE and PPO updates in your browser, drag PPO's clip, dial GAE's λ, and break a robot's reward function on purpose.">
-<meta property="og:image" content="https://bakulbadwal.github.io/policy-pond/docs/hero.png">
+<meta property="og:image" content="https://bakulbadwal.github.io/policy-pond/docs/share.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" id="favicon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='36' r='26' fill='%237FB8D9' stroke='%234A2E1E' stroke-width='4'/%3E%3Ccircle cx='32' cy='30' r='14' fill='%23F9D95B' stroke='%234A2E1E' stroke-width='4'/%3E%3Cpath d='M44 30l10 3-10 3z' fill='%23E8923A' stroke='%234A2E1E' stroke-width='3' stroke-linejoin='round'/%3E%3Ccircle cx='36' cy='27' r='2.5' fill='%234A2E1E'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -112,7 +115,7 @@ HONESTY: the learners are real (REINFORCE, a baseline, PPO's clipped update, GAE
   <div class="card">
     <div class="scene" data-art="s1"></div>
     <h2>1 · Lucky crossings: nudge the habit toward what paid</h2>
-    <p class="lede">Now there are three ways across. <b>A</b> hugs the reeds: about 1 crumb, every time. <b>B</b> passes the bread boat: 2 crumbs <i>on average</i>, but wildly up and down. <b>C</b> goes through the mud: about 0.3. The duckling's habit is three numbers turned into probabilities (a softmax). <span class="g" data-g="reinforce">REINFORCE</span> updates it after every crossing: make the route just taken more likely, in proportion to the crumbs it brought. This is the real algorithm, running in your browser.</p>
+    <p class="lede">Now there are three ways across. <b>A</b> hugs the reeds: about 1 crumb, every time. <b>B</b> passes the bread boat: 2 crumbs <i>on average</i>, but wildly up and down. <b>C</b> goes through the mud: about 0.3. The duckling's habit is three numbers turned into probabilities that add up to 1 (a trick called softmax). <span class="g" data-g="reinforce">REINFORCE</span> updates it after every crossing: make the route just taken more likely, in proportion to the crumbs it brought (its haul: the return G from step 0). This is the real algorithm, running in your browser.</p>
     <p class="covers">Covers <b>HF Deep RL Course, Unit 4</b>: policy-based methods, the policy gradient, REINFORCE (Monte Carlo policy gradient)</p>
   </div>
   <div class="card">
@@ -200,7 +203,7 @@ HONESTY: the learners are real (REINFORCE, a baseline, PPO's clipped update, GAE
     <h3>Race: 40 ducklings with Mama, 40 without</h3>
     <div class="row"><button class="act" id="s2race">Run the race</button><span class="muted" style="font:15px var(--hand)">300 crossings each, with the finishing bonus you set above</span></div>
     <canvas id="s2chart" height="220" style="margin-top:12px" aria-label="Learning curves with and without a baseline"></canvas>
-    <div class="chartcap"><span class="sw" style="background:#C8452F"></span>without Mama · <span class="sw" style="background:#3B7422"></span>with Mama (a running average of hauls). Line = the average duckling's expected crumbs (bonus excluded); band = how much ducklings differ.</div>
+    <div class="chartcap"><span class="sw" style="background:#C8452F"></span>without Mama · <span class="sw" style="background:#3B7422"></span>with Mama (a running average of past hauls). Line = the average duckling's expected crumbs (bonus excluded); band = how much ducklings differ.</div>
     <div class="callout co-i">Set the bonus to 0 and the two flocks run neck and neck. That's real, not a bug: a baseline helps most when every crossing carries a large common reward, which real tasks nearly always do ("alive" bonuses, "upright" bonuses). The larger the shared part, the more the baseline removes.</div>
   </div>
 
@@ -225,9 +228,38 @@ HONESTY: the learners are real (REINFORCE, a baseline, PPO's clipped update, GAE
       <div class="opts"><button data-a="0" data-right>Good step</button><button data-a="1">Neutral: no crumbs yet</button><button data-a="2">Bad step: it cost a paddle</button></div>
       <div class="why">Good. δ = 0 + 0.99 × 6 − 5 = <b>+0.94</b>. No crumbs arrived yet, but it moved somewhere better than Mama expected, and that's worth reinforcing now instead of waiting for the far bank. That's the whole trick of actor-critic.</div>
     </div>
+  </div>
+
+  <div class="card">
+    <h3>Watch Mama learn her guess</h3>
+    <p class="lede">Where does V(s) come from? Mama isn't given it. She watches crossings on the step 0 pond and, after every paddle, nudges her guess for the tile the duckling just left by a fraction of her surprise: <b>V(here) ← V(here) + α · δ</b>. That's the whole critic. The gold ticks are the exact answer for this habit, worked out from the pond's rules; her guesses (blue) should creep toward them.</p>
+    <div class="pg">
+      <div class="panel">
+        <div class="sl"><div class="sl-h"><span>Habit: how often it tries to go right</span><b id="s2vpv"></b></div><input type="range" id="s2vp" min="0.3" max="1" step="0.05" value="0.8" aria-label="Habit for Mama's lessons"></div>
+        <div class="lbl">How much of each surprise she takes on board (α)</div><div class="seg" id="s2valpha"></div>
+        <div class="btnrow"><button class="act" id="s2vone">1 crossing</button><button class="ghost" id="s2vtwenty">+20</button><button class="ghost" id="s2vtwo">+200</button><button class="ghost" id="s2vreset">Forget it all</button></div>
+        <div class="lbl">Change the habit and Mama starts over: a tile's value is only defined for a given habit.</div>
+      </div>
+      <div>
+        <div class="vbars" id="s2v" role="img" aria-label="Mama's value estimate for each tile against the exact value"></div>
+        <div class="chartcap"><span class="sw" style="background:#246A9C"></span>Mama's guess V(tile) · <span class="sw" style="background:#E0A91E"></span>exact value for this habit · the far bank is worth 0: the crossing is over</div>
+        <div class="grid g4" style="margin-top:10px">
+          <div class="stat"><div class="v" id="s2vn">0</div><div class="l">crossings watched</div></div>
+          <div class="stat"><div class="v bad" id="s2vgap"></div><div class="l">biggest gap to the exact value</div></div>
+          <div class="stat"><div class="v acc" id="s2vloss">–</div><div class="l">value loss: mean δ² on the last crossing</div></div>
+          <div class="stat"><div class="v gold" id="s2vex0"></div><div class="l">exact value of tile 0 for this habit</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="predict" data-p="s2c">
+      <div class="tag">Guess first!</div>
+      <div class="q">At habit 80%, tile 0 is worth about +4.5 crumbs. Drop the habit to 50%. What is tile 0 worth now, in the exact book?</div>
+      <div class="opts"><button data-a="0">Still about +4</button><button data-a="1">About 0</button><button data-a="2" data-right>About −25</button></div>
+      <div class="why">About −25. With a 50/50 habit the duckling drifts back and forth, and every paddle costs a crumb, so from tile 0 the expected bill is far bigger than the 20 crumbs at the end. Same pond, same crumbs, different habit, different value: <b>V(s) is always "for this policy"</b>. That's why the critic has to keep re-learning as the actor changes, and why Microduck's config gives the critic's loss a weight of its own (<code>value_loss_coef</code>, step 6).</div>
+    </div>
     <div class="say" data-say="s2">
       <div class="tag">Say it out loud</div>
-      <div class="line">Mama's guess V(s) doesn't change which way the push points on average; it subtracts what was coming anyway, so the noise collapses. The TD error, r + γ·V(next) − V(here), scores a single step against her guess.</div>
+      <div class="line">Mama's guess V(s) doesn't change which way the push points on average; it subtracts what was coming anyway, so the noise collapses. The TD error, r + γ·V(next) − V(here), scores a single step against her guess, and she learns that guess from the same surprises.</div>
     </div>
   </div>
 </section>
@@ -237,7 +269,7 @@ HONESTY: the learners are real (REINFORCE, a baseline, PPO's clipped update, GAE
   <div class="card">
     <div class="scene" data-art="s3"></div>
     <h2>3 · The lane ropes: PPO</h2>
-    <p class="lede">Crossings are expensive, so you'd like to learn several lessons from each batch of them. But every lesson moves the habit, and after a few the habit is no longer the one that collected the batch, so the batch starts lying. PPO measures the drift for each crossing as a <span class="g" data-g="ratio">ratio</span>, <b>r = π<sub>new</sub>(route) ÷ π<sub>old</sub>(route)</b>, and puts <span class="g" data-g="clip">lane ropes</span> at 1 − ε and 1 + ε. Inside the ropes, learn freely. Outside, credit for going further stops, <i>but undoing a mistake is always allowed</i>.</p>
+    <p class="lede">Crossings are expensive, so you'd like to learn several lessons from each batch of them. But every lesson moves the habit, and after a few the habit is no longer the one that collected the batch, so the batch starts lying. PPO measures the drift for each crossing as a <span class="g" data-g="ratio">ratio</span>, <b>r = π<sub>new</sub>(route) ÷ π<sub>old</sub>(route)</b> (a second <i>r</i>, nothing to do with step 2's reward; the course and the code both reuse the letter), and puts <span class="g" data-g="clip">lane ropes</span> at 1 − ε and 1 + ε. Inside the ropes, learn freely. Outside, credit for going further stops, <i>but undoing a mistake is always allowed</i>.</p>
     <p class="covers">Covers <b>HF Deep RL Course, Unit 8</b>: the intuition behind PPO, the clipped surrogate objective, visualizing the six cases</p>
   </div>
   <div class="card">
@@ -277,7 +309,7 @@ HONESTY: the learners are real (REINFORCE, a baseline, PPO's clipped update, GAE
 
   <div class="card">
     <h3>Reuse one batch, with and without the ropes</h3>
-    <p class="lede">64 crossings are collected with a no-preference habit. Then PPO takes full-batch gradient steps on that same batch, one per <span class="g" data-g="epoch">epoch</span>. Watch each route's ratio. With the ropes on, ratios mostly stop near the ropes; with them off, they keep going. "Mostly" matters: the clip removes the <i>incentive</i> to push further, it doesn't enforce a hard bound, so the other routes' still-active crossings can drag a clipped route past its rope (try a few new batches). That's why real PPO also watches how far each update moved, as <span class="g" data-g="kl">KL divergence</span> (step 6).</p>
+    <p class="lede">64 crossings are collected with a no-preference habit. Then PPO takes full-batch gradient steps on that same batch, one per <span class="g" data-g="epoch">epoch</span>. Watch each route's ratio. With the ropes on, ratios mostly stop near the ropes; with them off, they keep going. "Mostly" matters. The clip removes the <i>incentive</i> to push further; it isn't a hard wall. So the crossings still pushing another route can drag a capped route's ratio past its rope anyway (try a few new batches). That's why real PPO also watches how far each update moved, as <span class="g" data-g="kl">KL divergence</span> (step 6).</p>
     <div class="pg">
       <div class="panel">
         <div class="sl"><div class="sl-h"><span>Epochs on this one batch (K)</span><b id="s3kv"></b></div><input type="range" id="s3k" min="1" max="20" step="1" value="10" aria-label="Epochs"></div>
@@ -322,7 +354,7 @@ HONESTY: the learners are real (REINFORCE, a baseline, PPO's clipped update, GAE
   <div class="card">
     <div class="scene" data-art="s4"></div>
     <h2>4 · The λ dial: how much to trust Mama</h2>
-    <p class="lede">A real robot doesn't cross a pond in one go. Microduck collects a <span class="g" data-g="rollout">rollout</span> of 24 steps from each simulated duck, then stops for an update. To score step 5 of those 24, you can use just Mama's one-step surprise (steady, but only as good as her guesses), or every real reward to the end of the slice (honest, but noisy), or something in between. <span class="g" data-g="gae">GAE</span> adds up Mama's surprises along the boardwalk, fading each later one by γλ.</p>
+    <p class="lede">A real robot doesn't cross a pond in one go. Microduck collects a <span class="g" data-g="rollout">rollout</span> of 24 steps from each simulated duck, then stops for an update. To score step 5 of those 24, you can use just Mama's one-step surprise (steady, but only as good as her guesses), or every real reward to the end of the slice (honest, but noisy), or something in between. Picture those 24 steps as planks on a boardwalk toward the far bank: plank 5 is the fifth step. <span class="g" data-g="gae">GAE</span> adds up Mama's surprises along the boardwalk, fading each later one by γλ. Drag λ below and watch the advantage at your chosen plank change.</p>
     <div class="callout co-w"><b>Not explained in the course.</b> The HF course uses GAE without ever explaining it: it appears as <code>gae_lambda=0.98</code> in Unit 1's PPO settings and as an uncommented loop in Unit 8's CleanRL code. Every real PPO uses it, Microduck's included. Source: Schulman et al., <i>High-Dimensional Continuous Control Using Generalized Advantage Estimation</i> (2016).</div>
     <p class="covers">Fills the gap between <b>Unit 6</b> (the one-step TD advantage) and <b>Unit 8</b> (PPO)</p>
   </div>
@@ -351,7 +383,7 @@ HONESTY: the learners are real (REINFORCE, a baseline, PPO's clipped update, GAE
     <div class="chartcap">Spread of the plank-1 advantage across 200 noisy walks, for each λ. The dot is your λ.</div>
     <div class="predict" data-p="s4a">
       <div class="tag">Guess first!</div>
-      <div class="q">"A stumble at plank 15", λ = 0. What does the stumble do to the advantage at plank 5?</div>
+      <div class="q">"A stumble at plank 15" (a surprise of −1.1 there), λ = 0. What does the stumble do to the advantage at plank 5?</div>
       <div class="opts"><button data-a="0" data-right>Nothing: plank 5 only sees its own step</button><button data-a="1">Drags it down a little</button><button data-a="2">Drags it down a lot</button></div>
       <div class="why">Nothing. At λ = 0 the advantage is just that plank's own one-step surprise, and plank 5 was an ordinary step, exactly as Mama expected: 0.00. At λ = 0.95 the stumble ten planks later reaches back at weight 0.9405¹⁰ ≈ 0.54 and drags plank 5 down to about −0.60. Which is right depends on whether the stumble was plank 5's fault, and that is exactly the bias-noise trade.</div>
     </div>
@@ -380,7 +412,7 @@ HONESTY: the learners are real (REINFORCE, a baseline, PPO's clipped update, GAE
   <div class="card">
     <div class="lbl">Task</div><div class="seg" id="s5task"></div>
     <div class="terms" id="s5terms"></div>
-    <div class="callout co-i">Two kinds of penalty, from the playbook. A <b>cost</b> (mjlab style) returns positive numbers, so it needs a <b>negative</b> weight. A <b>self-negating penalty</b> (<code>*_penalty</code>) already returns negative numbers, so it needs a <b>positive</b> weight. Get it backwards and the penalty becomes a payment. The check that always works: in the training logs, every penalty must read ≤ 0.</div>
+    <div class="callout co-i">Two kinds of penalty, from the playbook. A <b>cost</b> (the style of mjlab, the simulator library Microduck runs on) returns positive numbers, so it needs a <b>negative</b> weight. A <b>self-negating penalty</b> (<code>*_penalty</code>) already returns negative numbers, so it needs a <b>positive</b> weight. Get it backwards and the penalty becomes a payment. The check that always works: in the training logs, every penalty must read ≤ 0.</div>
     <div class="btnrow"><button class="act" id="s5train">Train 300 updates</button><button class="ghost" id="s5def">Reset weights</button></div>
     <div class="grid g2" style="margin-top:8px">
       <div><div class="lbl">What the robot learns</div><div class="behave" id="s5behave"></div></div>
@@ -411,7 +443,7 @@ HONESTY: the learners are real (REINFORCE, a baseline, PPO's clipped update, GAE
     <div class="scene" data-art="s6"></div>
     <h2>6 · The real duck: read an actual PPO config</h2>
     <p class="lede"><a href="https://github.com/pollen-robotics/microduck_rl" target="_blank" rel="noopener">Microduck</a> is an open-source ~800 g, 25 cm bipedal robot duck whose walking, standing-up and roller-skating policies are trained with PPO in simulation, then run on the real robot. Below is its actual training config. Every line is something from the pond. Click any setting.</p>
-    <p class="covers">From <b>pollen-robotics/microduck_rl</b> @ <code>d424a0c</code> · library behaviour checked in <b>leggedrobotics/rsl_rl</b> @ <code>857de61</code></p>
+    <p class="covers">From <b>pollen-robotics/microduck_rl</b> @ <code>d424a0c</code> · library behaviour checked in <b>leggedrobotics/rsl_rl</b> (the training library Microduck's code runs on) @ <code>857de61</code></p>
   </div>
   <div class="card">
     <div class="grid s6grid">
@@ -420,17 +452,53 @@ HONESTY: the learners are real (REINFORCE, a baseline, PPO's clipped update, GAE
     </div>
   </div>
   <div class="card">
+    <h3>The real thing: the PPO update, as rsl_rl writes it</h3>
+    <p class="lede">This is the loss Microduck's trainer minimises, copied from <a href="https://github.com/leggedrobotics/rsl_rl/blob/857de61/rsl_rl/algorithms/ppo.py#L268-L285" target="_blank" rel="noopener"><code>rsl_rl/algorithms/ppo.py</code></a>, lines 268–285 and 309–310 at commit <code>857de61</code> (two <code># type: ignore</code> comments trimmed). Every line is something from the pond. Two things to know first: PyTorch <i>minimises</i>, so everything the pond <i>maximised</i> appears with its sign flipped, and <code>batch.advantages</code> is the GAE advantage from step 4, already normalised over the whole batch to mean 0 and spread 1 (lines 190–191).</p>
+    <div class="grid s6grid">
+<pre class="cfg" aria-label="rsl_rl PPO loss">268  # Surrogate loss
+269  ratio = torch.exp(actions_log_prob - torch.squeeze(batch.old_actions_log_prob))
+270  surrogate = -torch.squeeze(batch.advantages) * ratio
+271  surrogate_clipped = -torch.squeeze(batch.advantages) * torch.clamp(
+272      ratio, 1.0 - self.clip_param, 1.0 + self.clip_param
+273  )
+274  surrogate_loss = torch.max(surrogate, surrogate_clipped).mean()
+275
+276  # Value function loss
+277  if self.use_clipped_value_loss:
+278      value_clipped = batch.values + (values - batch.values).clamp(-self.clip_param, self.clip_param)
+279      value_losses = (values - batch.returns).pow(2)
+280      value_losses_clipped = (value_clipped - batch.returns).pow(2)
+281      value_loss = torch.max(value_losses, value_losses_clipped).mean()
+282  else:
+283      value_loss = (batch.returns - values).pow(2).mean()
+284
+285  loss = surrogate_loss + self.value_loss_coef * value_loss - self.entropy_coef * entropy.mean()
+…
+309  nn.utils.clip_grad_norm_(self.actor.parameters(), self.max_grad_norm)
+310  nn.utils.clip_grad_norm_(self.critic.parameters(), self.max_grad_norm)</pre>
+      <div class="panel">
+        <div class="map"><b>269</b><span><code>exp(log π<sub>new</sub> − log π<sub>old</sub>)</code> is <b>r</b>, new ÷ old: a difference of logs is a ratio. Step 3.</span></div>
+        <div class="map"><b>270–273</b><span>The two terms inside the pond's <code>min</code>: <b>r · A</b> and <b>clip(r) · A</b>, each with a minus sign because the optimizer minimises. <code>clip_param</code> is ε, the lane ropes. Step 3.</span></div>
+        <div class="map"><b>274</b><span><code>max</code> of two negatives is the pond's <code>min</code>, flipped. Averaged over the minibatch. Step 3.</span></div>
+        <div class="map"><b>277–283</b><span>Mama being trained: her guess <code>values</code> is pulled toward <code>batch.returns</code>, which is the GAE advantage plus her old guess (step 4). With <code>use_clipped_value_loss</code> her guess gets lane ropes of its own. Step 2, "Watch Mama learn".</span></div>
+        <div class="map"><b>285</b><span>One loss for both networks: the actor's, plus the critic's weighted by <code>value_loss_coef</code>, minus an entropy bonus weighted by <code>entropy_coef</code> (a spread-out habit keeps exploring, step 0).</span></div>
+        <div class="map"><b>309–310</b><span><code>max_grad_norm</code>: the last safety catch. If a batch produces a wild gradient, its length is capped before the optimizer uses it, separately for actor and critic.</span></div>
+        <div class="map"><b>not shown</b><span>The loop around this block is step 3's reuse: <code>num_learning_epochs</code> × <code>num_mini_batches</code> passes over one rollout (line 207), then the batch is thrown away.</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
     <h3>What one update costs</h3>
     <div class="pg">
       <div class="panel">
         <div class="sl"><div class="sl-h"><span>Simulated ducks (<span class="g" data-g="envs">envs</span>)</span><b id="s6ev"></b></div><input type="range" id="s6e" min="0" max="7" step="1" value="6" aria-label="Number of environments"></div>
         <div class="sl"><div class="sl-h"><span>Training rounds (iterations)</span><b id="s6iv"></b></div><input type="range" id="s6i" min="0" max="6" step="1" value="6" aria-label="Iterations"></div>
-        <div class="lbl">Fixed from the config: 24 steps per duck · 4 minibatches · 5 epochs · 50 steps per second</div>
+        <div class="lbl">Fixed from the config: 24 steps per duck · 4 <span class="g" data-g="minibatch">minibatches</span> · 5 <span class="g" data-g="epoch">epochs</span> (4 × 5 = 20 gradient steps per update) · 50 steps per second</div>
       </div>
       <div>
         <div class="grid g3">
           <div class="stat"><div class="v" id="s6batch"></div><div class="l">steps per update</div></div>
-          <div class="stat"><div class="v acc" id="s6mb"></div><div class="l">steps per minibatch</div></div>
+          <div class="stat"><div class="v acc" id="s6mb"></div><div class="l">steps per <span class="g" data-g="minibatch">minibatch</span></div></div>
           <div class="stat"><div class="v" id="s6gs"></div><div class="l">gradient steps per update</div></div>
           <div class="stat"><div class="v gold" id="s6dt"></div><div class="l">duck-time per update</div></div>
           <div class="stat big"><div class="v" id="s6tot"></div><div class="l">total duck-time, whole run</div></div>
@@ -481,7 +549,7 @@ HONESTY: the learners are real (REINFORCE, a baseline, PPO's clipped update, GAE
   <div class="card">
     <div class="scene" data-art="cap"></div>
     <h2>★ The reward review board</h2>
-    <p class="lede">Three training runs went wrong, each a real failure from Microduck's <code>AGENTS.md</code> playbook, where the rules were "each learned the hard way". Read the evidence, fix the scorecard, re-train, and say why it broke. A case passes only if the robot does the right thing <b>and</b> the fix is the right kind of fix.</p>
+    <p class="lede">Three training runs went wrong for real, and each mistake is now a rule in Microduck's <code>AGENTS.md</code> playbook, learned the hard way. Read the evidence, fix the scorecard, re-train, and say why it broke. A case passes only if the robot does the right thing <b>and</b> the fix is the right kind of fix.</p>
     <div class="row"><span class="stars" id="capstars">☆☆☆</span><span class="muted" id="capscore" style="font:16px var(--hand)"></span></div>
   </div>
   <div class="card" id="cap1"></div>

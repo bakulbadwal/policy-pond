@@ -18,6 +18,9 @@ Numeric checks are asserted against `window.PP` / `window.PPSim` (the pure math 
 | A10 | TD error | r 0, V 5 → 6, γ 0.99 → +0.94 · r 1, V 4 → 4 → +0.96 | ✓ |
 | A11 | GAE presets use a self-consistent critic, V = k · 0.1 / (1 − γ) | "Nothing surprising": A = 0.000 at every plank, λ and γ · stumble, plank 5: λ 0 → 0.000, λ 0.95 → −0.596 · gust, plank 5, λ 0.95 → +0.749 · optimist (k = 1.3), plank 1, λ 0.95 → −0.389 | ✓ |
 | A12 | Config fidelity | every value in `js/microduck.js` matches `microduck_velocity_env_cfg.py` @ `d424a0c` at the stated line (914–948); roller `entropy_coef = 0.03` at line 652 | ✓ |
+| A14 | Exact tile values on the step 0 pond (value iteration, γ = 0.99, no day limit; the far bank is terminal, value 0) | habit 80%: tile 0 = +4.48, tile 6 = +18.41 · habit 50%: tile 0 = −25.12 · habit 30%: tile 0 = −78.92 · habit 100%: tile 0 = +10.01 | ✓ |
+| A15 | TD(0) learning converges to them (α = 0.1, habit 80%, seeded) | biggest gap to the exact values 2.45 after 200 crossings, 0.68 after 2,000; changing the habit resets the estimates | ✓ |
+| A16 | The rsl_rl loss block quoted in step 6 | matches `rsl_rl/algorithms/ppo.py` lines 268–285 and 309–310 at `857de61`, with only two `# type: ignore` comments removed; advantages are normalised over the whole batch at lines 190–191 | ✓ |
 | A13 | Library behaviour (rsl_rl main @ `857de61`) | adaptive schedule: KL > 2 × desired → lr ÷ 1.5 (floor 1e-5); KL < desired / 2 → lr × 1.5 (ceiling 1e-2) (`ppo.py:241-256`) · `std_type="scalar"` = one learnable std per action dimension (`distribution.py:165-168`) | ✓ |
 
 ## B. The toys teach the right direction (seeded, same for every visitor)
@@ -50,6 +53,8 @@ Numeric checks are asserted against `window.PP` / `window.PPSim` (the pure math 
 - C8 Field test: eight questions answered by operating the widgets, graded automatically (8/8 on right answers, 0/8 on wrong ones). Every question is answerable from a widget; question 2 asks for the K = 40 flock's stuck count (9, from B6).
 - C9 The flock plays out round by round (round 0 = untrained, 15 = final); the step 5 and review-board learners play their 300 updates before the log audit appears. The learner animation is time-based with a timeout fallback, so the audit and the grade land within ~1.2 s even in a background tab where animation frames are throttled (verified: 1,212 ms with the tab hidden). Both jump straight to the end under `prefers-reduced-motion`.
 - C10 Every step but the last ends with a "Next: …" button.
+- C11 Step 2 shows the critic being trained ("Watch Mama learn"): TD(0) estimates per tile against the exact values, with a prediction that turns on V(s) depending on the policy (A14). Step 6 quotes the real rsl_rl loss with every line mapped to a pond term and the step that taught it (A16).
+- C12 Social previews use a 1200 × 630 card (`docs/share.png`) declared in `og:image` with width, height and `twitter:card`.
 
 ## D. It works
 

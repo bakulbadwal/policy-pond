@@ -306,3 +306,18 @@ a.ghost:hover{background:#FFF1C6}
 @keyframes won{0%{transform:scale(1)}40%{transform:scale(1.14)}100%{transform:scale(1)}}
 .strip.over .tile:not(.here){opacity:.55}
 .tile6.now{outline:3px solid var(--yellow);outline-offset:2px;opacity:1}
+/* Mama learns: value bars per tile */
+.vbars{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px;background:var(--water);border:2.5px solid var(--line);border-radius:10px;padding:10px 8px 6px;box-shadow:inset 0 -6px 0 rgba(36,106,156,.25)}
+.vt{text-align:center;min-width:0}
+.vb{position:relative;height:170px;background:var(--ripple);border:2px solid rgba(74,46,30,.35);border-radius:6px;overflow:hidden}
+.vt.goal .vb{background:#DDBB8A}
+.vb .est{position:absolute;left:20%;width:60%;background:#246A9C;border:1.5px solid var(--line);border-radius:3px;transition:bottom .25s,height .25s}
+.vb .ex{position:absolute;left:6%;width:88%;height:0;border-top:3px solid #E0A91E;box-shadow:0 0 0 1px var(--line);z-index:2}
+.vb .zero{position:absolute;left:0;right:0;height:0;border-top:1.5px dashed rgba(74,46,30,.45)}
+.vl{font:400 14px var(--hand);color:#1F5A85;margin-top:3px}
+.vv{font:700 13px var(--sign);color:var(--ink);overflow-wrap:anywhere}
+@media(max-width:600px){.vb{height:120px}.vv{font-size:11px}}
+.map{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;padding:7px 0;border-bottom:1.5px dotted rgba(74,46,30,.3);font-size:14.5px}
+.map:last-child{border-bottom:0}
+.map b{font:700 15px var(--sign);color:var(--brick-d);white-space:nowrap;min-width:62px}
+.cfg{font-size:12.5px}

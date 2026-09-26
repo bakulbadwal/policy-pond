@@ -10,9 +10,9 @@
   // Tiles 0..7; breadcrumbs sit on tile 7 (+20, episode ends). Each move costs −1 (effort).
   // The current pushes it the wrong way 15% of the time.
   var STRIP = { n: 8, goal: 7, crumb: 20, step: -1, maxSteps: 25 };
-  function stripEpisode(seed, pRight) {
-    var R = PP.rng(seed), s = 0, out = [];
-    for (var t = 0; t < STRIP.maxSteps; t++) {
+  function stripEpisode(seed, pRight, maxSteps) {
+    var R = PP.rng(seed), s = 0, out = [], T = maxSteps || STRIP.maxSteps;
+    for (var t = 0; t < T; t++) {
       var a = R() < pRight ? 1 : -1;          // the habit: how often it tries to go right
       var slip = R() < 0.15;                  // the pond: 15% of the time the current pushes the other way
       var move = slip ? -a : a;
@@ -24,6 +24,25 @@
       if (done) break;
     }
     return out;
+  }
+
+  // The exact value of each tile under a fixed habit (value iteration on the 8-state chain, no day
+  // limit): what Mama's guess should converge to. The goal tile is terminal, so its value is 0.
+  function stripExactValues(pRight, gamma) {
+    var n = STRIP.n, V = new Array(n).fill(0), pR = 0.85 * pRight + 0.15 * (1 - pRight);   // chance the duckling actually moves right
+    for (var it = 0; it < 5000; it++) {
+      var W = V.slice(), diff = 0;
+      for (var s = 0; s < n; s++) {
+        if (s === STRIP.goal) { W[s] = 0; continue; }
+        var right = Math.min(n - 1, s + 1), left = Math.max(0, s - 1);
+        var vR = right === STRIP.goal ? STRIP.crumb : STRIP.step + gamma * V[right];
+        var vL = STRIP.step + gamma * V[left];
+        W[s] = pR * vR + (1 - pR) * vL;
+        diff = Math.max(diff, Math.abs(W[s] - V[s]));
+      }
+      V = W; if (diff < 1e-10) break;
+    }
+    return V;
   }
 
   /* ================= three routes across the pond (steps 1–3) ================= */
@@ -287,7 +306,7 @@
   }
 
   root.PPSim = {
-    STRIP: STRIP, stripEpisode: stripEpisode, ROUTES: ROUTES, routeReward: routeReward, expectedReward: expectedReward,
+    STRIP: STRIP, stripEpisode: stripEpisode, stripExactValues: stripExactValues, ROUTES: ROUTES, routeReward: routeReward, expectedReward: expectedReward,
     scatter: scatter, trainReinforce: trainReinforce, race: race, ppoReuse: ppoReuse, ppoMany: ppoMany, ppoTrain: ppoTrain, ppoFleet: ppoFleet,
     TRACES: TRACES, traceValues: traceValues, gaeSpread: gaeSpread, TASKS: TASKS, behaviourTotals: behaviourTotals, learnMenu: learnMenu, penaltyAudit: penaltyAudit,
     taxSchedule: taxSchedule, attemptTax: attemptTax, drScore: drScore, drTrain: drTrain
