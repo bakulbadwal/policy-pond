@@ -125,8 +125,13 @@
   var drawers = {};
   function ctxFor(id) {
     var c = $(id), dpr = window.devicePixelRatio || 1;
-    var w = c.clientWidth || c.parentNode.clientWidth || 600, h = +c.getAttribute("height");
+    // The markup's height attribute is the CSS height. Setting c.height below rewrites that attribute,
+    // so remember what we wrote: an attribute that differs from it was set on purpose.
+    var attr = c.getAttribute("height");
+    if (!c.dataset.h || attr !== c.dataset.wrote) c.dataset.h = attr;
+    var w = c.clientWidth || c.parentNode.clientWidth || 600, h = +c.dataset.h;
     c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); c.style.height = h + "px";
+    c.dataset.wrote = String(c.height);
     var x = c.getContext("2d"); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, w, h);
     x.font = "14px 'Patrick Hand', sans-serif"; x.textBaseline = "middle";
     return { x: x, w: w, h: h };
