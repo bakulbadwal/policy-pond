@@ -6,6 +6,10 @@
 
 ![Policy Pond: a Busytown-style cutaway of the pond, where every creature wears its RL label](docs/hero.png)
 
+![Step 3, the lane ropes: the ratio is dragged across 1 ± ε while the clipped objective, its slope and the live six-case table respond](docs/linkedin/policy-pond-carousel.gif)
+
+*Step 3 in motion: drag the ratio past a rope and the push stops (case 5); drag it back below the ropes and the push is allowed again (case 3). The ropes cap good news, never bad news.*
+
 A duckling learns to cross a pond the way a robot learns to walk. The **duckling** is the agent and its habits are the **policy**, the **pond** is the environment, and **breadcrumbs** are the reward. **Mama Duck** is the critic, who knows what a crossing usually earns. The **lane ropes** are PPO's clip, and the **scorecard** is the reward function you write. Hold that picture and the rest of deep RL follows, from REINFORCE to PPO.
 
 ## What's inside
