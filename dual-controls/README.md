@@ -6,6 +6,10 @@
 
 ![Dual Controls: a Busytown-style driving school, where a learner car with a student and an instructor drives on a lot, an examiner watches photos from the office, and the exam bay has a chequered sign](docs/hero.png)
 
+![Animated demo of step 5: three lessons drawn on the lot. With short corrections, the instructor drives 5 of 10 moves in lesson 1 and 3 of 10 by lesson 40, each takeover in red with a ✕ at the move the student wanted; as a backseat driver she drives all 8 moves of lesson 40](docs/demo.gif)
+
+*Step 5 in motion: short corrections hand the wheel back as the student learns (5 of 10 moves hers in lesson 1, 3 of 10 in lesson 40); the backseat driver still drives every move at lesson 40.*
+
 ![The lot in step 5: a student's lesson drawn in yellow, the instructor's three-move takeovers in red, each with a red ✕ at the move the student wanted](docs/lot.png)
 
 *Step 5, a lesson with short corrections: yellow is the student, red is the instructor's three-move takeover, and each ✕ marks the move the student was about to make.*
