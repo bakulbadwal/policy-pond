@@ -41,6 +41,10 @@ The good interactive RL explainers are tabular. Karpathy's [REINFORCEjs](https:/
 
 For TD vs Monte Carlo intuition, the Distill article is better than anything here, and Lilian Weng's [Reward Hacking in RL](https://lilianweng.github.io/posts/2024-11-28-reward-hacking/) is the survey to read after step 5.
 
+## The sequel: Dual Controls
+
+Policy Pond's PPO learns on-policy from thousands of fresh episodes, which a real robot can't afford. [**Dual Controls**](https://bakulbadwal.github.io/policy-pond/dual-controls/) ([source and docs](dual-controls/)) is the follow-on for reinforcement learning on real hardware with a human in the loop: HIL-SERL, as LeRobot implements it. A Busytown driving school, where the student driver is the policy, the logbook is the replay buffer, the examiner who only sees dashcam photos is the learned reward classifier, and the instructor's second brake is the intervention. Off-policy soft actor-critic (discrete, tabular), the entropy temperature, a classifier's false positives being exploited, demonstrations in the buffer (RLPD's 50/50 batches), interventions, and the safety fence, all seeded and tested (`node dual-controls/tests/check.js`).
+
 ## Run it
 
 Play it live at the link above, or open `index.html` in a browser. There's no build step, no dependencies, and nothing to install. `?run=1#s3` opens step 3 with both flocks already trained.
