@@ -8,7 +8,7 @@ This file records only what the driving school changes.
 
 | Token | Hex | Use |
 |---|---|---|
-| plate / plate-d | `#C8322B` / `#962019` | the learner plate: masthead and footer, replacing the kitchen's brick and Wet Paint's road-works orange |
+| plate / plate-d | `#C8322B` / `#962019` | the learner plate: masthead and footer, replacing the kitchen's brick and Demos to Deployment's road-works orange |
 | student | `#F4C430` | anything the student drove: path segments, its logbook, the LEARNER roof sign |
 | instructor | `#C8322B` | anything the instructor drove: her takeovers on the lot, her brake pedal, the intervention rate |
 | demo | `#246A9C` | the instructor's demo drives and her logbook (the demo buffer) |

@@ -42,5 +42,5 @@ Used at a laptop in study sessions, and on a phone when shared. Steps are done i
 
 ## Brand commitments
 
-- Name: **Dual Controls**. A sibling of Inference Kitchen, Policy Pond, Wet Paint and the rest: same design system, a driving-school palette and a learner-plate red masthead.
+- Name: **Dual Controls**. A sibling of Inference Kitchen, Policy Pond, Demos to Deployment and the rest: same design system, a driving-school palette and a learner-plate red masthead.
 - Must not look like "every AI tool" (dark ground, neon accent, glowing cards) or like a corporate SaaS dashboard.
